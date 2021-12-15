@@ -5,11 +5,11 @@ import datetime
 keys, data = np.load("JMA_AMeDASdata_Tokyo_20210801-001000_20210806-000000.npz", allow_pickle=True).values()
 print(keys, data.shape) #keyの確認
 
-def get_column_by_key(data, key):
+def get_column_by_key(data, keys, key):
     return data[:, np.where(keys == key)].flatten()
 
-dt = get_column_by_key(data, "DT") #Date&Time
-temp = get_column_by_key(data, "temp") #Temperature
+dt = get_column_by_key(data, keys, "DT") #Date&Time
+temp = get_column_by_key(data, keys, "temp") #Temperature
 print(dt[:10])
 print(temp[:10])
 
@@ -72,7 +72,7 @@ plot_waves(axes, dt, amps, (0,4,5,10))
 plt.legend(loc='upper right', framealpha=0.5)
 plt.show() #気温のplot
 
-aws = get_column_by_key(data, "AWS")
+aws = get_column_by_key(data, keys, "AWS")
 ffted_aws = fft_and_plot(aws, plot= False)
 
 dt, axes = fig_axisformatter_bydate()
@@ -103,8 +103,8 @@ def ws_wd_to_u_v_translation(ws,wd):
     v = -ws*np.cos(wd)
     return u, v
 
-aws = get_column_by_key(data, "AWS")
-awd = get_column_by_key(data, "AWD")
+aws = get_column_by_key(data, keys, "AWS")
+awd = get_column_by_key(data, keys, "AWD")
 au, av = ws_wd_to_u_v_translation(aws,awd)
 ffted_au = fft_and_plot(au, plot= False)
 ffted_av = fft_and_plot(av, plot= False)
