@@ -16,8 +16,9 @@ print(temp[:10])
 def fft_and_plot(col, plot=True): #一次元配列をFFT, plot=Trueなら結果をplot
     ffted = np.fft.fft(col)/len(col) #normalize
     if plot == True:
-        plt.plot(ffted.real)
-        plt.plot(ffted.imag)
+        plt.plot(ffted.real, label ="real")
+        plt.plot(ffted.imag, label ="imag")
+        plt.legend(loc='upper right', framealpha=0.5)
         plt.grid()
         plt.show()
     return ffted
@@ -37,6 +38,7 @@ temp_amps = calc_amps(ffted_temp)
 print(abs(temp_amps[:21])) #波数0は平均値を表す
 plt.plot(np.arange(1,21), abs(temp_amps[1:21]), label ="TEMP amps") #波数5と10にシグナルあり
 plt.legend(loc='upper right', framealpha=0.5)
+plt.grid()
 plt.show()
 
 #グラフを描いてくれるおまじない
@@ -114,6 +116,7 @@ print(abs(av_amps[:21])) #波数0は平均値を表す
 plt.plot(np.arange(1,21), abs(au_amps[1:21]), label ="AU amps") #波数5と10にシグナルあり
 plt.plot(np.arange(1,21), abs(av_amps[1:21]), label ="AV amps") #波数5と10にシグナルあり
 plt.legend(loc='upper right', framealpha=0.5)
+plt.grid()
 plt.show()
 
 dt, axes = fig_axisformatter_bydate()
