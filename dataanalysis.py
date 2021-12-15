@@ -35,7 +35,8 @@ def calc_amps(ffted_data):
 
 temp_amps = calc_amps(ffted_temp)
 print(abs(temp_amps[:21])) #波数0は平均値を表す
-plt.plot(np.arange(1,21), abs(temp_amps[1:21])) #波数5と10にシグナルあり
+plt.plot(np.arange(1,21), abs(temp_amps[1:21]), label ="TEMP amps") #波数5と10にシグナルあり
+plt.legend(loc='upper right', framealpha=0.5)
 plt.show()
 
 #グラフを描いてくれるおまじない
@@ -86,7 +87,7 @@ plt.legend(loc='upper right', framealpha=0.5)
 plt.show() #tempとAWS（平均風速）のplot
 
 #WindSpeed, WindDirection -> u, v components
- def ws_wd_to_u_v_translation(ws,wd):
+def ws_wd_to_u_v_translation(ws,wd):
     wd_dict = {"北":0, "北北西":1, "北西":2, "西北西":3,
                "西":4, "西南西":5, "南西":6, "南南西":7,
                "南":8, "南南東":9, "南東":10, "東南東":11,
@@ -106,13 +107,22 @@ au, av = ws_wd_to_u_v_translation(aws,awd)
 ffted_au = fft_and_plot(au, plot= False)
 ffted_av = fft_and_plot(av, plot= False)
 
+au_amps = calc_amps(ffted_au)
+av_amps = calc_amps(ffted_av)
+print(abs(au_amps[:21])) #波数0は平均値を表す
+print(abs(av_amps[:21])) #波数0は平均値を表す
+plt.plot(np.arange(1,21), abs(au_amps[1:21]), label ="AU amps") #波数5と10にシグナルあり
+plt.plot(np.arange(1,21), abs(av_amps[1:21]), label ="AV amps") #波数5と10にシグナルあり
+plt.legend(loc='upper right', framealpha=0.5)
+plt.show()
+
 dt, axes = fig_axisformatter_bydate()
 axes.plot(dt, au, label ="real AU")
 axes.plot(dt, av, label ="real AV")
 au_amps = calc_amps(ffted_au)
 av_amps = calc_amps(ffted_av)
 plot_waves(axes, dt, au_amps, (10,), additional_label_exp="AU")
-plot_waves(axes, dt, av_amps, (0,10,), additional_label_exp="AV") #0成分は背景場の南北風速成分を示す
+plot_waves(axes, dt, av_amps, (0,5,10,), additional_label_exp="AV") #0成分は背景場の南北風速成分を示す
 plt.legend(loc='upper right', framealpha=0.5)
 plt.show()
     
