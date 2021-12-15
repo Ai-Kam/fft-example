@@ -24,17 +24,29 @@ def fft_and_plot(col, plot=True): #一次元配列をFFT, plot=Trueなら結果�
 
 ffted_temp = fft_and_plot(temp)
 
-def plot_waves(axes, X, lenx, ffted_data, wavenum, when_plot, additional_label_exp="" ):
+def calc_amps(ffted_data):
+    n = len(ffted_data)
+    amps = np.array(ffted_data[0])
+    if (n % 2): # odd [0,1,2,3,-3,-2,-1]
+        amps = np.append((np.atleast_1d(amps), ffted_data[1:int(n/2)+1]+ffted_data[-1:-int(n/2)-1:-1].conj()))
+    else: #even [0,1,2,3,-2,-1]
+        amps = np.concatenate((np.atleast_1d(amps), ffted_data[1:int(n/2)]+ffted_data[-1:-int(n/2):-1].conj(), np.atleast_1d(ffted_data[-int(n/2)])))
+    return amps
+
+temp_amps = calc_amps(ffted_temp)
+print(abs(temp_amps[:21])) #波数0は平均値を表す
+plt.plot(np.arange(1,21), abs(temp_amps[1:21])) #波数5と10にシグナルあり
+plt.show()
+
+def plot_waves(axes, X, lenx, amps, wavenum, when_plot, additional_label_exp="" ):
     theta = np.linspace(0, 2*np.pi, lenx+1)[:-1]
     expressed_wave = np.zeros_like(theta)
-    amps = np.array(ffted_data[0])
-    amps = np.append(amps, (ffted_data[1:wavenum+1]+ffted_data[-1:-(wavenum+1):-1].conj()))
     for n in range(wavenum+1):
         expressed_wave += amps[n].real * np.cos(n*theta) - amps[n].imag*np.sin(n*theta)
         if n in when_plot:
             axes.plot(X, expressed_wave, label='%s n=%d' % (additional_label_exp, n))
 
-def date_formatter():
+def fig_axisformatter_bydate():
     plt.close(1)
     figure_ = plt.figure(1, figsize=(8,4))
     axes = figure_.add_subplot(111)
@@ -50,23 +62,25 @@ def date_formatter():
 lenx =144*5
 wavenum = 10
 """
-dt, axes = date_formatter()
+dt, axes = fig_axisformatter_bydate()
 axes.plot(dt, temp, label ="real temp")
-plot_waves(axes, dt, lenx, ffted_temp, wavenum, (0,4,5,10))
+amps = calc_amps(ffted_temp)
+plot_waves(axes, dt, lenx, amps, wavenum, (0,4,5,10))
 plt.legend(loc='upper right', framealpha=0.5)
 plt.show()
 
 aws = get_column_by_key(data, "AWS")
 ffted_aws = fft_and_plot(aws, plot= False)
-dt, axes = date_formatter()
+dt, axes = fig_axisformatter_bydate()
 axes.plot(dt, aws, label ="real AWS")
-plot_waves(axes, dt, lenx, ffted_aws, wavenum, (0,4,5,10))
+amps = calc_amps(ffted_aws)
+plot_waves(axes, dt, lenx, amps, wavenum, (0,4,5,10))
 plt.legend(loc='upper right', framealpha=0.5)
 plt.show()
 
-dt, axes = date_formatter()
-plot_waves(axes, dt, lenx, ffted_temp, wavenum, (10,), additional_label_exp="temp")
-plot_waves(axes, dt, lenx, ffted_aws*5, wavenum, (10,), additional_label_exp="AWS*5")
+dt, axes = fig_axisformatter_bydate()
+plot_waves(axes, dt, lenx, calc_amps(ffted_temp), wavenum, (10,), additional_label_exp="temp")
+plot_waves(axes, dt, lenx, calc_amps(ffted_aws)*5, wavenum, (10,), additional_label_exp="AWS*5")
 plt.legend(loc='upper right', framealpha=0.5)
 plt.show()
 """
@@ -91,7 +105,7 @@ def ws_wd_to_u_v_translation(ws,wd):
 au, av = ws_wd_to_u_v_translation(aws,awd)
 ffted_au = fft_and_plot(au, plot= False)
 ffted_av = fft_and_plot(av, plot= False)
-dt, axes = date_formatter()
+dt, axes = fig_axisformatter_bydate()
 axes.plot(dt, au, label ="real AU")
 axes.plot(dt, av, label ="real AV")
 plot_waves(axes, dt, lenx, ffted_au, wavenum, (10,), additional_label_exp="AU")
