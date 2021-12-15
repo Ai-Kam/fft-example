@@ -38,14 +38,16 @@ print(abs(temp_amps[:21])) #波数0は平均値を表す
 plt.plot(np.arange(1,21), abs(temp_amps[1:21])) #波数5と10にシグナルあり
 plt.show()
 
-def plot_waves(axes, X, lenx, amps, wavenum, when_plot, additional_label_exp="" ):
-    theta = np.linspace(0, 2*np.pi, lenx+1)[:-1]
+#グラフを描いてくれるおまじない
+def plot_waves(axes, X, amps, when_plot, additional_label_exp="" ):
+    theta = np.linspace(0, 2*np.pi, len(X)+1)[:-1]
     expressed_wave = np.zeros_like(theta)
-    for n in range(wavenum+1):
+    for n in range(max(when_plot)+1):
         expressed_wave += amps[n].real * np.cos(n*theta) - amps[n].imag*np.sin(n*theta)
         if n in when_plot:
             axes.plot(X, expressed_wave, label='%s n=%d' % (additional_label_exp, n))
 
+#日付軸にしてくれるおまじない
 def fig_axisformatter_bydate():
     plt.close(1)
     figure_ = plt.figure(1, figsize=(8,4))
@@ -59,36 +61,32 @@ def fig_axisformatter_bydate():
     plt.grid()
     return dt, axes
 
-lenx =144*5
-wavenum = 10
-"""
+
 dt, axes = fig_axisformatter_bydate()
 axes.plot(dt, temp, label ="real temp")
 amps = calc_amps(ffted_temp)
-plot_waves(axes, dt, lenx, amps, wavenum, (0,4,5,10))
+plot_waves(axes, dt, amps, (0,4,5,10))
 plt.legend(loc='upper right', framealpha=0.5)
-plt.show()
+plt.show() #気温のplot
 
 aws = get_column_by_key(data, "AWS")
 ffted_aws = fft_and_plot(aws, plot= False)
+
 dt, axes = fig_axisformatter_bydate()
 axes.plot(dt, aws, label ="real AWS")
 amps = calc_amps(ffted_aws)
-plot_waves(axes, dt, lenx, amps, wavenum, (0,4,5,10))
+plot_waves(axes, dt, amps, (0,4,5,10))
 plt.legend(loc='upper right', framealpha=0.5)
-plt.show()
+plt.show() #AWS（平均風速）のplot
 
 dt, axes = fig_axisformatter_bydate()
-plot_waves(axes, dt, lenx, calc_amps(ffted_temp), wavenum, (10,), additional_label_exp="temp")
-plot_waves(axes, dt, lenx, calc_amps(ffted_aws)*5, wavenum, (10,), additional_label_exp="AWS*5")
+plot_waves(axes, dt, calc_amps(ffted_temp), (10,), additional_label_exp="temp")
+plot_waves(axes, dt, calc_amps(ffted_aws)*5, (10,), additional_label_exp="AWS*5")
 plt.legend(loc='upper right', framealpha=0.5)
-plt.show()
-"""
+plt.show() #tempとAWS（平均風速）のplot
 
-aws = get_column_by_key(data, "AWS")
-awd = get_column_by_key(data, "AWD")
-
-def ws_wd_to_u_v_translation(ws,wd):
+#WindSpeed, WindDirection -> u, v components
+ def ws_wd_to_u_v_translation(ws,wd):
     wd_dict = {"北":0, "北北西":1, "北西":2, "西北西":3,
                "西":4, "西南西":5, "南西":6, "南南西":7,
                "南":8, "南南東":9, "南東":10, "東南東":11,
@@ -96,20 +94,25 @@ def ws_wd_to_u_v_translation(ws,wd):
     for item in wd_dict.items(): #場合によっては欠損値などが入る恐れあり
         wd = np.where(wd == item[0], item[1], wd)
     wd = wd.astype("float64")
-    print(wd, wd.dtype) #確認
+    print(wd, wd.dtype) #全て変換できているか確認
     wd *= np.pi/8
     u = -ws*np.sin(wd)
     v = -ws*np.cos(wd)
     return u, v
- 
+
+aws = get_column_by_key(data, "AWS")
+awd = get_column_by_key(data, "AWD")
 au, av = ws_wd_to_u_v_translation(aws,awd)
 ffted_au = fft_and_plot(au, plot= False)
 ffted_av = fft_and_plot(av, plot= False)
+
 dt, axes = fig_axisformatter_bydate()
 axes.plot(dt, au, label ="real AU")
 axes.plot(dt, av, label ="real AV")
-plot_waves(axes, dt, lenx, ffted_au, wavenum, (10,), additional_label_exp="AU")
-plot_waves(axes, dt, lenx, ffted_av, wavenum, (0,10,), additional_label_exp="AV")
+au_amps = calc_amps(ffted_au)
+av_amps = calc_amps(ffted_av)
+plot_waves(axes, dt, au_amps, (10,), additional_label_exp="AU")
+plot_waves(axes, dt, av_amps, (0,10,), additional_label_exp="AV") #0成分は背景場の南北風速成分を示す
 plt.legend(loc='upper right', framealpha=0.5)
 plt.show()
     
