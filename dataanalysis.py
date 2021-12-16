@@ -85,8 +85,8 @@ plt.show() #AWS（平均風速）のplot
 dt, axes = fig_axisformatter_bydate()
 temp_amps = calc_amps(ffted_temp)
 aws_amps = calc_amps(ffted_aws)
-plot_waves(axes, dt, temp_amps, (10,), additional_label_exp="temp")
-plot_waves(axes, dt, aws_amps*5, (10,), additional_label_exp="AWS*5")
+plot_waves(axes, dt, temp_amps, (1,10), additional_label_exp="temp")
+plot_waves(axes, dt, aws_amps*5, (1,10), additional_label_exp="AWS*5")
 plt.legend(loc='upper right', framealpha=0.5)
 plt.show() #tempとAWS（平均風速）のplot
 
