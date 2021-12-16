@@ -83,10 +83,32 @@ plt.legend(loc='upper right', framealpha=0.5)
 plt.show() #AWS（平均風速）のplot
 
 dt, axes = fig_axisformatter_bydate()
-plot_waves(axes, dt, calc_amps(ffted_temp), (10,), additional_label_exp="temp")
-plot_waves(axes, dt, calc_amps(ffted_aws)*5, (10,), additional_label_exp="AWS*5")
+temp_amps = calc_amps(ffted_temp)
+aws_amps = calc_amps(ffted_aws)
+plot_waves(axes, dt, temp_amps, (10,), additional_label_exp="temp")
+plot_waves(axes, dt, aws_amps*5, (10,), additional_label_exp="AWS*5")
 plt.legend(loc='upper right', framealpha=0.5)
 plt.show() #tempとAWS（平均風速）のplot
+
+def corrcoef_plot(X, amps1, amps2, plot_range, additional_label_exp=""):
+    theta = np.linspace(0, 2*np.pi, len(X)+1)[:-1]
+    expressed_wave1 = np.zeros_like(theta)
+    expressed_wave2 = expressed_wave1.copy()
+    n_min = min(plot_range)
+    x = np.array(range(len(plot_range)+1))+n_min
+    res = np.zeros_like(x).astype("float64")
+    for n_k in range(len(plot_range)+1):
+        n = n_k + n_min
+        expressed_wave1 += amps1[n].real * np.cos(n*theta) - amps1[n].imag*np.sin(n*theta)
+        expressed_wave2 += amps2[n].real * np.cos(n*theta) - amps2[n].imag*np.sin(n*theta)
+        if (n >= n_min):
+            res[n_k] = np.corrcoef(expressed_wave1 ,expressed_wave2)[1,0]
+    plt.plot(x, res, label='%s' % (additional_label_exp))
+    plt.legend(loc='upper right', framealpha=0.5)
+    plt.grid()
+    plt.show()
+
+corrcoef_plot(dt, temp_amps, aws_amps, range(1,20), additional_label_exp="temp&AWS")
 
 #WindSpeed, WindDirection -> u, v components
 def ws_wd_to_u_v_translation(ws,wd):
